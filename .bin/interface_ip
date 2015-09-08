@@ -1,0 +1,24 @@
+#!/usr/bin/python2
+
+import socket
+import fcntl
+import struct
+
+def get_ip_address(ifname):
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        return socket.inet_ntoa(fcntl.ioctl(
+            s.fileno(),
+            0x8915,  # SIOCGIFADDR
+            struct.pack('256s', ifname[:15])
+        )[20:24])
+    except IOError:
+        return "No IP Address." 
+
+if __name__ == "__main__":
+    import sys
+    if len(sys.argv) == 1:
+        print "Usage: interface_ip <interface>"
+        exit(1)
+    else:
+        print get_ip_address(sys.argv[1])

@@ -1,0 +1,10 @@
+#!/bin/sh
+
+. ~/.config/colors/$_THEME
+. ~/.panel/panel_config
+
+res="$(resolution)"
+res_x="$(echo $res | ft -f 1 -d 'x')"
+res_y="$(echo $res | ft -f 2 -d 'x')"
+
+dmenu_run -i -y $PANEL_HEIGHT -w $(($res_x / 3)) -h 20 -p "$" -nb "$background_color" -nf "$foreground_color" -sb "$background_color" -sf "$blue_alt"

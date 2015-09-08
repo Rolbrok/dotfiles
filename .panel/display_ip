@@ -1,0 +1,11 @@
+#!/bin/sh
+
+interfaces=( "enp1s0" "wlp2s0" )
+
+for i in "${interfaces[@]}"; do
+    ip=$(interface_ip $i)
+    if [ "$ip" != "No IP Address." ]; then
+        echo "$i: $ip"
+        notify-write "$i: $ip" 
+    fi
+done

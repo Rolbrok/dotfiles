@@ -1,0 +1,226 @@
+#!/bin/sh
+
+. panel_config
+
+if [ $(pgrep -cx panel) -gt 1 ]; then
+    echo "Panel already running."
+    exit 1
+fi
+
+trap 'trap - TERM; kill 0' INT TERM QUIT EXIT
+
+[ -e "$PANEL_FIFO" ] && rm "$PANEL_FIFO"
+mkfifo "$PANEL_FIFO"
+[ -e "$EXEC_FIFO" ] && rm "$EXEC_FIFO"
+mkfifo "$EXEC_FIFO"
+
+bspc config top_padding $(($PANEL_HEIGHT + $U_PADDING))
+bspc config bottom_padding $U_PADDING
+bspc config left_padding $PADDING
+bspc config right_padding $PADDING
+
+# Workspaces
+bspc control --subscribe > "$PANEL_FIFO" &
+# Title
+xtitle -sf 'T%s' -t 20 > "$PANEL_FIFO" &
+
+# clock
+while :;
+do
+    echo 'C\uf017' $(date +"%R");
+    sleep 5;
+done > "$PANEL_FIFO" &
+
+# date
+while :;
+do
+    echo 'D\uf073' $(date +"%d %b");
+    sleep 5;
+done > "$PANEL_FIFO" &
+
+# battery
+while :;
+do
+    bat_level=$(acpi -b | ft -f 4 | ft -d '%' -f 1)
+    if [ -z "$bat_level" ]; then
+        echo 'AC Power Only'
+    else
+        if [ "$(battery | ft -f 1)" == "Discharging" ]; then
+            if [ $bat_level -ge 95 ]; then
+                echo 'B\uf240' $bat_level%
+            elif [ $bat_level -ge 75 ]; then
+                echo 'B\uf241' $bat_level%
+            elif [ $bat_level -ge 50 ]; then
+                echo 'B\uf242' $bat_level%
+            elif [ $bat_level -ge 25 ]; then
+                echo 'B\uf243' $bat_level%
+            else
+                echo 'B\uf244' $bat_level%
+            fi
+        else
+            echo 'B\uf1e6' $bat_level%
+        fi
+    fi
+    sleep 30
+done > "$PANEL_FIFO" &
+
+# alsa volume and volume
+while :;
+do
+    volume=$(amixer -c 0 get Master | grep 'Mono: Playback' | grep -o '...%'  | sed 's/\[//' | sed 's/%//' | sed 's/ //')
+    state=$(amixer -c 0 get Master | grep 'Mono: Playback' | grep -o '\[on]')
+
+    if [ $state ]; then
+        if [ $volume -ge 70 ]; then
+            icon='V\uf028'
+        elif [ $volume -gt 0 ]; then
+            icon='V\uf027'
+        else
+            icon='V\uf026'
+        fi
+    fi
+
+    echo $icon $volume ' \uf185' $(math ceil "$(xbacklight)" i)%
+
+    sleep 0.2
+done > "$PANEL_FIFO" &
+
+# cpu usage
+while :;
+do
+    usage=$(grep 'cpu ' /proc/stat | awk '{usage=($2+$4)*100/($2+$4+$5)} END {print usage}')
+    printf "U\uf085 %.2f%%\n" "$usage"
+    sleep 10
+done > "$PANEL_FIFO" &
+
+# wifi
+while :;
+do
+    ssid=$(iw wlp2s0 link | grep 'SSID' | sed 's/SSID: //' | sed 's/\t//')
+    if [ -z "$ssid" ]; then
+        if [ "$(iw enp1s0 link)" != "Not connected." ]; then
+            echo 'LWired'
+        else
+            echo 'LNot connected.'
+        fi
+    else
+        echo 'L\uf1eb' $ssid
+    fi
+    sleep 10
+done > "$PANEL_FIFO" &
+
+# dmenu
+echo 'M>_' > "$PANEL_FIFO" &
+
+# reset_wm
+echo 'F\uf021' > "$PANEL_FIFO" &
+
+# power
+echo 'P\uf011' > "$PANEL_FIFO" &
+
+# music control
+while :;
+do
+    song_name=$(mpc | head -n 1 2>/dev/null)
+    if [ ! -z "$song_name" ]; then
+        if [ ${#song_name} -gt 40 ]; then
+            song_name="$(echo $song_name | cut -c 1-40)..."
+        fi
+        if [[ -n $(mpc status | grep paused 2>/dev/null) ]]; then
+            echo "R%{B$COLOR_FOCUSED_OCCUPIED_BG}%{F$COLOR_LINK_FG} %{A:mpc prev:}\uf048%{A} %{A:mpc stop:}\uf04d%{A} %{A:mpc play:}\uf04b%{A} %{A:mpc next:}\uf051%{A} %{F-}%{B-} $song_name"
+        elif [[ -n $(mpc status | grep playing 2>/dev/null) ]]; then
+            echo "R%{B$COLOR_FOCUSED_OCCUPIED_BG}%{F$COLOR_LINK_FG} %{A:mpc prev:}\uf048%{A} %{A:mpc stop:}\uf04d%{A} %{A:mpc pause:}\uf04c%{A} %{A:mpc next:}\uf051%{A} %{F-}%{B-} $song_name"
+        else
+            echo "R"
+        fi
+    elif [ "$(homenetwork)" == "Connected." ]; then
+        song_name=$(mpc -h 192.168.0.101 --pass mpd | head -n 1 2>/dev/null)
+        if [ ! -z "$song_name" ]; then
+            if [ ${#song_name} -gt 40 ]; then
+                song_name="$(echo $song_name | cut -c 1-40)..."
+            fi
+                
+            if [[ -n $(mpc status -h 192.168.0.101 --pass mpd | grep paused 2>/dev/null) ]]; then
+                echo "R%{B$COLOR_FOCUSED_OCCUPIED_BG}%{F$COLOR_LINK_FG} %{A:mpc -h 192.168.0.101 --pass mpd prev:}\uf048%{A} %{A:mpc -h 192.168.0.101 --pass mpd stop:}\uf04d%{A} %{A:mpc -h 192.168.0.101 --pass mpd play:}\uf04b%{A} %{A:mpc -h 192.168.0.101 --pass mpd next:}\uf051%{A} %{F-}%{B-} $song_name"
+            elif [[ -n $(mpc status -h 192.168.0.101 --pass mpd | grep playing 2>/dev/null) ]]; then
+                echo "R%{B$COLOR_FOCUSED_OCCUPIED_BG}%{F$COLOR_LINK_FG} %{A:mpc -h 192.168.0.101 --pass mpd prev:}\uf048%{A} %{A:mpc -h 192.168.0.101 --pass mpd stop:}\uf04d%{A} %{A:mpc -h 192.168.0.101 --pass mpd pause:}\uf04c%{A} %{A:mpc -h 192.168.0.101 --pass mpd next:}\uf051%{A} %{F-}%{B-} $song_name"
+            else
+                echo "R"
+            fi
+        fi 
+        sleep 4
+    fi
+    
+    sleep 1
+done > "$PANEL_FIFO" &
+
+# disks
+while :;
+do
+    disk1=$(df /home -h | ft -n 2 -z -f 4)
+    disk2=$(df / -h | ft -n 2 -z -f 4)
+
+    echo 'H1\uf1c0' $disk2
+    echo 'H2\uf015' $disk1
+
+    sleep 30
+done > "$PANEL_FIFO" &
+
+# unread mail
+while :;
+do
+    if [ "$(homenetwork -m)" = "Connected." ]; then
+        count="$(/usr/bin/read_mail gmail)"
+        count2="$(/usr/bin/read_mail reddit)"
+
+        echo 'Q\uf0e0' $count '\uf1a1' $count2
+
+    fi
+    sleep 90
+done > "$PANEL_FIFO" &
+
+# Server up
+while :;
+do
+    if [ "$(homenetwork -m)" = "Connected." ]; then
+        default_addr="192.168.0.101"
+        default_hostname="alarmpi"
+        arp_req="$(arp -a)"
+        
+        if [ $(echo "$arp_req" | wc -l) -gt 1 ]; then
+            ip_addr="$(echo $arp_req | grep -Eoh '^(alarmpi) \((.*?)\)' | sed -e 's/alarmpi (//g' -e 's/)//g')"
+            up_req="$(is_up "$ip_addr")"          
+            if [ "$up_req" -eq 0 ]; then
+                echo 'A\uf233 DOWN'
+            else
+                echo 'A\uf233 UP'
+            fi
+        else
+            up_req="$(is_up "$default_addr")"          
+            if [ "$up_req" -eq 0 ]; then
+                echo 'A\uf233 DOWN'
+            else
+                echo 'A\uf233 UP'
+            fi
+        fi 
+    fi
+
+    sleep 60
+done > "$PANEL_FIFO" &
+
+font_specialchars="-misc-fixed-medium-r-normal-*-11-0-75-75-c-0-iso10646-1"
+
+nb_screens=$(xrandr | grep ' connected' | ft -l)
+
+for i in $(seq $nb_screens);
+do
+    s_geometry="$(xrandr | grep ' connected' | ft -n $i -f 3)"
+    width=$(echo $s_geometry | ft -f 1 -d 'x')
+    padding=$(echo $s_geometry | ft -d '+' -f 2 | ft -d '+' -f 1)
+    geometry="${width}x${PANEL_HEIGHT}+${padding}+${U_PADDING}"
+
+    cat "$PANEL_FIFO" | panel_bar | lemonbar -p -g "$geometry" -f "$font1" -f "$font2" -f "$font_specialchars" -F "$COLOR_FOREGROUND" -B "$COLOR_BACKGROUND" > "$EXEC_FIFO" &
+    cat "$EXEC_FIFO" | bash &
+done
+
+wait

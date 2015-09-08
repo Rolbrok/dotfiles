@@ -1,0 +1,90 @@
+#!/usr/bin/python
+
+"""
+FILE FORMATTING:
+group : text
+"""
+
+import os
+import sys
+from sys import argv
+from time import sleep, clock, strftime
+
+WIDTH    = 210
+HEIGHT   = 30
+DURATION = 2
+X_OFF    = 16
+Y_OFF    = 16
+X_START  = 1366-WIDTH-X_OFF
+Y_START  = 32
+FILENAME = "/tmp/notify-server"
+LOG_FILE = ".notify-server.log"
+
+def get_Date():
+    return strftime("%d-%m-%Y")
+
+def get_Hour():
+    return strftime("%H:%M:%S")
+
+class Pos:
+    def __init__(self, x, y):
+        self.x = x
+        self.y = y
+
+class Notification:
+    def __init__(self, pos, text):
+        self.x = pos.x
+        self.y = pos.y
+        self.text = text
+
+    def display(self):
+        geometry = "{}x{}+{}+{}".format(WIDTH, 
+                                        HEIGHT, 
+                                        self.x, 
+                                        self.y)
+        os.popen("aplay  ~/.data/email-sound-Plop.wav")
+        os.popen("notify-dzen \"{}\" \"{}\" {}".format(self.text,
+                                                       geometry,
+                                                       DURATION))
+        with open(LOG_FILE, "a") as f:
+            f.write("[{}, {}] [{}] Writing '{}' with geometry '{}'\n".format(get_Date(),
+                                                                  get_Hour(),
+                                                                  "%.5f" % clock(),
+                                                                  self.text,
+                                                                  geometry))
+
+starting_text = "[{}, {}] STARTING NOTIFY-SERVER.\n{}\n".format(get_Date(), get_Hour(), 80*'-')
+open(LOG_FILE, "a").write(starting_text)
+
+open(FILENAME, "w").close()
+notifications = {}
+while 1:
+    try:
+        f = open(FILENAME, "r")
+        l = f.read().rstrip('\n').split('\n')   
+        f.close()
+        open(FILENAME, "w").close()
+
+        for last_line in l:
+            #last_line = l[len(l)-1]
+            if len(last_line) != 0:
+                elements = last_line.split(" : ")
+                if len(elements) == 2:
+                    group, text = elements
+                    if group not in notifications:
+                        notifications[group] = [0, Pos(X_START, Y_START+len(notifications)*(Y_OFF+HEIGHT))]
+                    notifications[group][0] += DURATION    
+
+                    Notification(notifications[group][1], text).display()            
+                else:
+                    text = elements[0]
+                    pos = Pos(X_START, Y_START+len(notifications)*(Y_OFF+HEIGHT))
+                    Notification(pos, text).display()
+
+        for i in notifications:
+            notifications[i][0] -= 0.5
+        sleep(0.5)
+        notifications = {i:notifications[i] for i in notifications if notifications[i][0] > 0}
+    except KeyboardInterrupt:
+        print("Quitting...")
+        break

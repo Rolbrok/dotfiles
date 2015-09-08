@@ -1,0 +1,46 @@
+#!/usr/bin/python
+
+import sys
+import subprocess as sb
+from subprocess import PIPE
+
+def command(text):
+    return sb.Popen(text, shell=True, stdout=PIPE).stdout.read().decode('utf-8').rstrip('\n')
+
+def get_disk(place, n = None):
+    if n is None:
+        location = place
+    else:
+        location = n
+    disk_used = command("df -h {0} | ft -n 2 | ft -z -f 3".format(place))
+    disk_full = command("df -h {0} | ft -n 2 | ft -z -f 2".format(place))
+    color = 92
+    percentage = int(disk_used[:-1:]) / int(disk_full[:-1:])
+    if percentage <= 20/100:
+        color = 94
+    elif percentage >= 80/100:
+        color = 91
+
+    print("{0}:{1}\033[{2}m{3} / {4}\033[m\t{5}".format( location, (20-len(location)-len(disk_used))*' ', color, disk_used, disk_full,\
+                                       command("loading_bar_c {0} {1} 10".format(disk_used, disk_full))\
+                                     ))
+
+if __name__ == "__main__":
+    print('Disk usage:')
+    if len(sys.argv) >= 2:
+        get_disk(sys.argv[1])
+    else:
+        get_disk('/')
+        get_disk('/home')
+        get_disk('/storage')
+        get_disk('/code')
+
+        videos = command("df -h | grep Videos")
+        if len(videos) != 0:
+            videos = videos.split(' ')
+            get_disk(videos[8], "/win/videos")
+
+        external = command("df -h | grep External")
+        if len(external) != 0:
+            external = external.split(' ')
+            get_disk(external[8], "/win/external")

@@ -1,0 +1,137 @@
+#!/bin/sh
+
+# Tool to manage home networks 
+
+# formatting:
+# $network$sep$mac
+# $network
+
+NET_FILE="/home/$USER/.networks"
+FILE_COPY="${NET_FILE}.bak"
+sep="="
+
+if [ ! -f $NET_FILE ]; then
+    touch $NET_FILE
+fi
+
+help()
+{
+cat << EOF
+Usage: homenetwork <command> <options>
+
+Commands:
+    -h, --help:     displays this message.
+    -m, --mac:      checks with mac address to be more precise
+    reset:          resets the list
+    list:           list all the networks
+    add [network] [mac]: 
+        if network name is left empty, using current one
+EOF
+exit 0
+}
+
+iw_interface="$(ip addr | grep wl | ft -f 2 | ft -d ':' -f 1)"
+net_mac="$(get_router)" #"$(arp -a | ft -z -n "$(arp -a | ft -l)" -f 4)"
+
+if [ -z "$iw_interface" ]; then 
+    # IF EMPTY CHECK IF CONNECTED
+    if [ -z "$1" -o "$1" == "-m" -o "$1" == "--mac" ]; then
+        count="$(grep -cx "${net_mac}" $NET_FILE)"
+        if [ $count -ge 1 ]; then
+            echo "Connected."
+            exit 0
+        else
+            echo "Not connected."
+            exit 1
+        fi
+    # HANDLE HELP
+    elif [ "$1" == "-h" -o "$1" == "--help" ]; then
+        help
+    fi
+
+    # HANDLE ADD COMMAND
+    if [ "$1" == "add" ]; then
+        if [ -z "$2" ]; then
+            count_mac="$(grep -cx "$net_mac" $NET_FILE)"
+            if [ $count_mac -ge 1 ]; then
+                echo  "Network already registered as home network."
+            else
+                echo "$net_mac" >> $NET_FILE
+                echo "Added mac address as a home network."
+            fi
+        else
+            if [ -z "$3" ]; then
+                echo "$2" >> $NET_FILE 
+            else
+                echo "$2$sep$3" >> $NET_FILE
+            fi
+        fi 
+    elif [ "$1" == "reset" ]; then
+        echo -n > $NET_FILE
+    elif [ "$1" == "list" ]; then
+        cat $NET_FILE
+    else
+        echo "Unrecognized command. Try 'homenetwork -h'"
+    fi
+    
+    exit 0
+fi
+
+net_ssid="$(essid -w $iw_interface)"
+
+# IF EMPTY CHECK IF CONNECTED
+if [ -z "$1" ]; then
+    count="$(cat $NET_FILE | grep -c "$net_ssid")"
+    if [ $count -ge 1 ]; then
+        echo "Connected."
+        exit 0
+    else
+        echo "Not connected."
+        exit 1
+    fi
+# IF MAC CHECKS WITH MAC
+elif [ "$1" == "-m" -o "$1" == "--mac" ]; then
+    count="$(grep -cx "${net_ssid}${sep}${net_mac}" $NET_FILE)"
+    if [ $count -ge 1 ]; then
+        echo "Connected."
+        exit 0
+    else
+        echo "Not connected."
+        exit 1
+    fi
+# HANDLE HELP
+elif [ "$1" == "-h" -o "$1" == "--help" ]; then
+    help
+fi
+
+# HANDLE ADD COMMAND
+if [ "$1" == "add" ]; then
+    if [ -z "$2" ]; then
+        count="$(cat $NET_FILE | grep -c "$net_ssid")"
+        count_mac="$(grep -cx "$net_ssid$sep$net_mac" $NET_FILE)"
+        if [ $count_mac -ge 1 ]; then
+            echo  "Network already registered as home network."
+        elif [ $count -ge 1 ]; then
+            cat $NET_FILE | sed -e "s/${net_ssid}/${net_ssid}${sep}${net_mac}/g" > $FILE_COPY
+            cat $FILE_COPY
+            cat $FILE_COPY > $NET_FILE
+            rm $FILE_COPY
+            echo "Added mac address to the network."
+        else
+            echo "$net_ssid$sep$net_mac" >> $NET_FILE
+        fi
+    else
+        if [ -z "$3" ]; then
+            echo "$2" >> $NET_FILE 
+        else
+            echo "$2$sep$3" >> $NET_FILE
+        fi
+    fi 
+elif [ "$1" == "reset" ]; then
+    echo -n > $NET_FILE
+elif [ "$1" == "list" ]; then
+    cat $NET_FILE
+else
+    echo "Unrecognized command. Try 'homenetwork -h'"
+fi
+

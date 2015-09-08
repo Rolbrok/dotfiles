@@ -1,0 +1,57 @@
+#!/bin/sh
+
+#nb_open=$(pgrep -cx termite)
+nf_open=$(($(ps aux | grep -c "nofloat termite")-1))
+f_open=$(($(ps aux | grep -c "float termite")-1))
+nb_open=$(($f_open-$nf_open))
+
+calc() {
+python << EOF
+print(int($@))
+EOF
+}
+
+PADDING=40
+size_x=500 # default: 500
+size_y=140 # default: 140
+
+origin_x=$(calc "1366-$size_x-$PADDING")
+origin_y=$(calc "768-$size_y-$PADDING")
+
+geom() {
+    echo "$1x$2+$3+$4"
+}
+
+if [ $nb_open -eq 1 ];
+then
+    geo=$(geom ${size_x} ${size_y} $origin_x $origin_y)
+elif [ $nb_open -eq 2 ]; then
+    geo=$(geom ${size_x} ${size_y} $PADDING $(calc "$origin_y-$size_y-$PADDING"))
+elif [ $nb_open -eq 3 ]; then
+    geo=$(geom ${size_x} ${size_y} $origin_x $(calc "$origin_y-$size_y-$PADDING"))
+elif [ $nb_open -eq 4 ]; then
+    geo=$(geom ${size_x} ${size_y} $PADDING $(calc "$origin_y-2*($size_y+$PADDING)"))
+elif [ $nb_open -eq 5 ]; then
+    geo=$(geom ${size_x} ${size_y} $origin_x $(calc "$origin_y-2*($size_y+$PADDING)"))
+elif [ $nb_open -eq 6 ]; then
+    geo=$(geom ${size_x} ${size_y} $PADDING $(calc "$origin_y-3*($size_y+$PADDING)"))
+elif [ $nb_open -eq 7 ]; then
+    geo=$(geom ${size_x} ${size_y} $origin_x $(calc "$origin_y-3*($size_y+$PADDING)"))
+elif [ $nb_open -eq 8 ]; then
+    geo=$(geom ${size_x} ${size_y} $(calc "(1366-$size_x)/2") $(calc "$origin_y-3*($size_y+$PADDING)+$size_y/2+$PADDING/2"))
+elif [ $nb_open -eq 9 ]; then
+    geo=$(geom $size_x $size_y $(calc "(1366-$size_x)/2") $(calc "$origin_y-2*($size_y+$PADDING)+$size_y/2+$PADDING/2"))
+elif [ $nb_open -eq 10 ]; then
+    geo=$(geom $size_x $size_y $(calc "(1366-$size_x)/2") $(calc "$origin_y-$size_y-$PADDING+$size_y/2+$PADDING/2"))
+elif [ $nb_open -lt 1 ]; then 
+    geo=$(geom ${size_x} ${size_y} $PADDING $origin_y)
+else
+    notify-dzen "Stop openning terminals, you doofus." 250 &
+    exit
+fi 
+
+if [ -z "$1" ]; then
+float termite --geometry=$geo &
+else
+float termite --geometry=$geo -e "$1" &
+fi

@@ -1,0 +1,19 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    . ~/.config/colors/$_THEME
+else
+    . "$1"
+fi
+
+echo -e "\
+               0;30m             0;90m
+BLACK   | \033[0;30m$black █████████ \033[m\033[0;90m$black_alt █████████\033[m
+RED     | \033[0;31m$red █████████ \033[m\033[0;91m$red_alt █████████\033[m
+GREEN   | \033[0;32m$green █████████ \033[m\033[0;92m$green_alt █████████\033[m
+YELLOW  | \033[0;33m$yellow █████████ \033[m\033[0;93m$yellow_alt █████████\033[m
+BLUE    | \033[0;34m$blue █████████ \033[m\033[0;94m$blue_alt █████████\033[m
+MAGENTA | \033[0;35m$magenta █████████ \033[m\033[0;95m$magenta_alt █████████\033[m
+CYAN    | \033[0;36m$cyan █████████ \033[m\033[0;96m$cyan_alt █████████\033[m
+WHITE   | \033[0;37m$white █████████ \033[m\033[0;97m$white_alt █████████\033[m\
+"

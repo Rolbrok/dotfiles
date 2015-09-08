@@ -1,0 +1,9 @@
+#!/bin/sh
+
+if [ -z "$1" ]; then
+    echo "Usage: float <program> <arguments>"
+    exit
+fi
+
+bspc rule -r $1 floating=true
+$@

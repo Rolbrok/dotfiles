@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ $(pgrep -cx panel) -gt 1 ]; then
+    pkill -x xflux
+fi
+
+LATITUDE="48.893615"
+KTEMP="4600"
+
+xflux -l "$LATITUDE" -k "$KTEMP" -r 1 -nofork

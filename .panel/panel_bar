@@ -1,0 +1,134 @@
+#!/bin/sh
+
+. panel_config
+
+num_mon=$(bspc query -M | wc -l)
+PADDING=" "
+L_PADDING="  "
+
+while read -r line; do
+    case $line in
+        A*)
+            # Server
+            server_up="$PADDING${line#?}$PADDING"
+            ;;
+        D*)
+            #date
+            date="$L_PADDING${line#?}"
+            ;;
+        H1*)
+            l=${line#?}
+            disk1="$L_PADDING${l#?}$L_PADDING"
+            ;;
+        H2*)
+            l=${line#?}
+            disk2="${l#?}$L_PADDING"
+            ;;
+        U*)
+            cpu="${line#?}$L_PADDING"
+            ;;
+        R*)
+            # music info
+            music="$PADDING${line#?}$L_PADDING"
+            ;;
+        C*)
+            # clock
+            clock="$L_PADDING${line#?}$L_PADDING"
+            ;;
+        B*)
+            # battery
+            battery="$L_PADDING${line#?}$L_PADDING"
+            ;;
+        M*)
+            # dmenu
+            dmenu="$PADDING%{B$COLOR_FOCUSED_OCCUPIED_BG}%{A:dmenu_launch:}$L_PADDING${line#?}$L_PADDING%{A}%{B-}" 
+            ;;
+        Q*)
+            # mail
+            mail="$PADDING${line#?}$PADDING" 
+            ;;
+        T*)
+            # xtitle
+            t=${line#?}
+            if [ -z "$t" ]; then
+                title=""
+            else
+                title="%{B$COLOR_TITLE_BG}%{F$COLOR_TITLE_FG}%{U$COLOR_FOREGROUND}%{+u}$L_PADDING$t$L_PADDING%{-u}%{F-}%{B-}$PADDING"
+            fi
+            ;;
+        V*)
+            # volume
+            volume="$L_PADDING${line#?}$L_PADDING"
+            ;;
+        L*)
+            # wifi
+            link=${line#?}
+            if [ "$link" != "Not connected." ]; then
+                wifi="%{B$COLOR_LINK_BG}%{F$COLOR_LINK_FG}%{A:display_ip:}$PADDING$link$PADDING%{A}%{F-}%{B-}"
+            else
+                wifi="$PADDING$link$PADDING"
+            fi
+            ;;
+        P*)
+            # power
+            power="%{B$COLOR_FOCUSED_OCCUPIED_BG}%{A:power_options:}$L_PADDING${line#?}$L_PADDING%{A}%{B-}"
+            ;;
+        F*)
+            # reset wm
+            reset_wm="%{A:reset_panel:}${line#?}$L_PADDING%{A}"
+            reset_wm=""
+            ;;
+        W*)
+            # bspwm control subscribe
+            wm_infos=""
+            IFS=':'
+            set -- ${line#?}
+            while [ $# -gt 0 ]; do
+                item=$1
+                name=${item#?}
+                displayed="\u2022" #$(echo $name | ft -d '/' -f 2)
+                case $item in
+                    M*)
+                        # active monitor
+                        if [ $num_mon -gt 1 ]; then
+                            wm_infos="$wm_infos %{F$COLOR_ACTIVE_MONITOR_FG}%{B$COLOR_ACTIVE_MONITOR_BG}$PADDING${displayed}$PADDING%{B-}%{F-}"
+                        fi
+                        ;;
+                    m*)
+                        # inactive monitor
+                        if [ $num_mon -gt 1 ]; then
+                            wm_infos="$wm_infos %{F$COLOR_INACTIVE_MONITOR_FG}%{B$COLOR_INACTIVE_MONITOR_BG}$PADDING${displayed}$PADDING%{B-}%{F-}"
+                        fi
+                        ;;
+                    O*)
+                        # focused occupied desktop
+                        wm_infos="${wm_infos}%{F$COLOR_FOCUSED_OCCUPIED_FG}%{B$COLOR_FOCUSED_OCCUPIED_BG}%{U$COLOR_FOREGROUND}%{+u}$PADDING${displayed}$PADDING%{-u}%{B-}%{F-}"
+                        ;;
+                    F*)
+                        # focused free desktop
+                        wm_infos="${wm_infos}%{F$COLOR_FOCUSED_FREE_FG}%{B$COLOR_FOCUSED_FREE_BG}%{U$COLOR_FOREGROUND}%{+u}$PADDING${displayed}$PADDING%{-u}%{B-}%{F-}"
+                        ;;
+                    U*)
+                        # focused urgent desktop
+                        wm_infos="${wm_infos}%{F$COLOR_FOCUSED_URGENT_FG}%{B$COLOR_FOCUSED_URGENT_BG}%{U$COLOR_FOREGROUND}%{+u}$PADDING${displayed}$PADDING%{-u}%{B-}%{F-}"
+                        ;;
+                    o*)
+                        # occupied desktop
+                        wm_infos="${wm_infos}%{F$COLOR_OCCUPIED_FG}%{B$COLOR_OCCUPIED_BG}%{A:bspc desktop -f ${name}:}$PADDING${displayed}$PADDING%{A}%{B-}%{F-}"
+                        ;;
+                    f*)
+                        # free desktop
+                        wm_infos="${wm_infos}%{F$COLOR_FREE_FG}%{B$COLOR_FREE_BG}%{A:bspc desktop -f ${name}:}$PADDING${displayed}$PADDING%{A}%{B-}%{F-}"
+                        ;;
+                    u*)
+                        # urgent desktop
+                        wm_infos="${wm_infos}%{F$COLOR_URGENT_FG}%{B$COLOR_URGENT_BG}%{A:bspc desktop -f ${name}:}$PADDING${displayed}$PADDING%{A}%{B-}%{F-}"
+                        ;;
+                esac
+                shift
+            done
+            ;;
+    esac
+
+    echo -ne "%{l}${wm_infos}${dmenu}${music} %{r}${title}${disk1}${disk2}${cpu}${mail}${wifi}${server_up}${volume}${battery}${date}${clock}${reset_wm}${power}\n"
+done

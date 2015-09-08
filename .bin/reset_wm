@@ -1,0 +1,134 @@
+#!/bin/sh
+
+. ~/.config/colors/$_THEME
+
+cat > ~/.Xresources << EOF
+xft.dpi: 96.0
+xft.lcdfilter: lcddefault
+
+*background: $background_color
+*foreground: $foreground_color
+
+! black
+*color0: $black
+
+! bright_black
+*color8: $black_alt
+
+! red
+*color1: $red
+
+! bright_red
+*color9: $red_alt
+
+! green
+*color2: $green
+
+! bright_green
+*color10: $green_alt
+
+! yellow
+*color3: $yellow
+
+! bright_yellow
+*color11: $yellow_akt
+
+! blue
+*color4: $blue
+
+! bright_blue
+*color12:  $blue_alt
+
+! magenta
+*color5: $magenta
+
+! bright_magenta
+*color13: $magenta_alt
+
+! cyan
+*color6: $cyan
+
+! bright_cyan
+*color14: $cyan_alt
+
+! white
+*color7: $white
+
+! bright_white
+*color15: $white_alt
+
+rofi.opacity: 98
+rofi.width: 50
+rofi.lines: 10
+rofi.columns: 1
+rofi.font: Terminus 10
+rofi.fg: $foreground_color
+rofi.bg: $background_color
+rofi.hlfg: $white_alt
+rofi.hlbg: $blue
+rofi.bc: $blue
+rofi.bw: 2
+rofi.loc: 0
+rofi.padding: 2
+rofi.yoffset: -4
+rofi.xoffset: 0
+rofi.fixed-num-lines: false
+rofi.hmode: false
+rofi.terminal: x-terminal-emulator
+rofi.ssh-set-title: true
+rofi.rkey: mod1+F2
+rofi.skey: mod1+F3
+EOF
+
+cat > ~/.config/termite/config << EOF
+[options]
+allow_bold           =  false
+audible_bell         =  false
+browser              =  firefox
+clickable_url        =  true
+cursor_blink         =  off
+cursor_shape         =  block
+dynamic_title        =  false
+font                 =  terminus 9
+mouse_autohide       =  false
+scroll_on_keystroke  =  true
+scroll_on_output     =  false
+scrollback_lines     =  10000
+search_wrap          =  true
+urgent_on_bell       =  true
+
+[colors]
+background  =  $background_color
+color0      =  $black
+color1      =  $red
+color10     =  $green_alt
+color11     =  $yellow_alt
+color12     =  $blue_alt
+color13     =  $magenta_alt
+color14     =  $cyan_alt
+color15     =  $white_alt
+color16     =  #fd971f
+color17     =  #cc6633
+color18     =  #383830
+color19     =  #49483e
+color2      =  #7db67d
+color20     =  #a59f85
+color21     =  #f5f4f1
+color3      =  $yellow
+color4      =  $blue
+color5      =  $magenta
+color6      =  $cyan
+color7      =  $white
+color8      =  $black_alt
+color9      =  $red_alt
+foreground  =  $foreground_color
+EOF
+
+feh --bg-fill ~/Pictures/sharky.jpg
+
+pkill -USR1 -x termite
+
+xrdb -load ~/.Xresources
+
+pkill panel
+~/.config/bspwm/bspwmrc 1>/dev/null 2>&1

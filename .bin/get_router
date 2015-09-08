@@ -1,0 +1,12 @@
+#!/bin/sh
+
+interface="wlp2s0"
+
+if_req="$(ifconfig | grep -A1 "$interface:")"
+broadcast="$(echo "$if_req" | grep -Eoh "broadcast (.*?)" | sed -e 's/broadcast//g')"
+router_ip="$(echo $broadcast | ft -d '.' -f 1..3).1"
+
+arp_req="$(arp -a)"
+router="$(echo "$arp_req" | grep -Eoh "\($router_ip\) (.*?) \[" | sed -e 's/\[//g' | ft -f 3)"
+
+echo $router

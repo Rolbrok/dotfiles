@@ -1,0 +1,75 @@
+xft.dpi: 96.0
+xft.lcdfilter: lcddefault
+
+*background: #2d2d2d
+*foreground: #8c8c8c
+
+! black
+*color0: #000000
+
+! bright_black
+*color8: #262626
+
+! red
+*color1: #ad8585
+
+! bright_red
+*color9: #d6c2c2
+
+! green
+*color2: #7db67d
+
+! bright_green
+*color10: #85ad85
+
+! yellow
+*color3: #adad85
+
+! bright_yellow
+*color11: 
+
+! blue
+*color4: #545490
+
+! bright_blue
+*color12:  #8585ad
+
+! magenta
+*color5: #ad85ad
+
+! bright_magenta
+*color13: #d6c2d6
+
+! cyan
+*color6: #85adad
+
+! bright_cyan
+*color14: #c2d6d6
+
+! white
+*color7: #d9d9d9
+
+! bright_white
+*color15: #ffffff
+
+rofi.opacity: 98
+rofi.width: 50
+rofi.lines: 10
+rofi.columns: 1
+rofi.font: Terminus 10
+rofi.fg: #8c8c8c
+rofi.bg: #2d2d2d
+rofi.hlfg: #ffffff
+rofi.hlbg: #545490
+rofi.bc: #545490
+rofi.bw: 2
+rofi.loc: 0
+rofi.padding: 2
+rofi.yoffset: -4
+rofi.xoffset: 0
+rofi.fixed-num-lines: false
+rofi.hmode: false
+rofi.terminal: x-terminal-emulator
+rofi.ssh-set-title: true
+rofi.rkey: mod1+F2
+rofi.skey: mod1+F3

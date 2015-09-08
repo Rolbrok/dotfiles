@@ -1,0 +1,37 @@
+#!/usr/bin/python
+
+import sys
+
+def convert(time):
+    time = [int(i) for i in time.rstrip(':').split(':')]
+    hours = 0
+    if time[0] != 0: hours += time[0]
+    if len(time) >= 2 and time[1] != 0: hours += time[1]/60
+    if len(time) == 3 and time[2] != 0: hours += time[2]/3600
+    return hours
+
+def convert_back(time):
+    try:
+        time = float(time)
+    except ValueError:
+        print("Value Error.")
+        exit()
+    hours = minutes = seconds = 0
+    if int(time) != 0:
+        hours = int(time)
+        minutes = (time % hours)*60
+        #seconds = (minutes % int(minutes))*60
+        if (int(minutes) == 0): seconds = minutes*60
+        else: seconds = (minutes % int(minutes))*60
+    else:
+        minutes = time*60
+        if (int(minutes) == 0): seconds = minutes*60
+        else: seconds = (minutes % int(minutes))*60
+    return "%00d:%00d:%00d" % (hours, int(minutes), int(seconds))
+    #return str(hours)+':'+str(int(minutes))+':'+str(int(seconds))
+
+if len(sys.argv) == 2:
+    if ':' in sys.argv[1]:
+        print(convert(sys.argv[1]))
+    else:
+        print(convert_back(sys.argv[1]))

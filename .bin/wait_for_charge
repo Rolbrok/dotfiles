@@ -1,0 +1,35 @@
+#!/bin/sh
+
+clear
+
+calc() {
+python << EOF
+from math import *
+
+args = []
+for v in "$@".split(' '):
+    try:
+        exec("d = {0}".format(v))
+        args.append(float(d))
+    except:
+        args.append(v)
+
+for i in args:
+    print(i, end=" ")
+print()
+EOF
+}
+
+charge_time=$(acpi | ft -f 5)
+charge=$(battery | ft -f 2)
+charge_speed=$(calc "(100-$charge)/$(hours $charge_time)")
+
+echo "Charge speed: $charge_speed %/h"
+
+while :; do
+    echo -ne "\r$(battery)%"
+    if [ $(battery | ft -f 2) -gt 85 ]; then
+        echo -e "\n\e[1;31m /!\ Battery too high /!\ \e[m"
+    fi
+    sleep 20
+done

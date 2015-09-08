@@ -1,0 +1,21 @@
+#!/bin/sh
+
+. panel_config
+
+options=( " \uf023     lock" " \uf021     reboot" " \uf011     poweroff" )
+commands=( "lock" "gksudo reboot" "gksudo poweroff" )
+WIDTH=120
+X_OFF=$((1366-$WIDTH)) 
+
+i=1
+for o in "${options[@]}"; do
+    Y_OFF=$(($PANEL_HEIGHT*$i))
+    geometry="${WIDTH}x${PANEL_HEIGHT}+$X_OFF+$Y_OFF"
+    echo -ne "%{A:${commands[$(($i-1))]}:} $o    %{A}\n" | lemonbar -p -g "$geometry" -f "$font1" -f "$font2" -B "$COLOR_BACKGROUND" -F "$COLOR_FOREGROUND" | bash &
+    let i++
+done
+
+sleep 3
+for z in $(seq $(($i-1))); do
+    pkill -n lemonbar
+done

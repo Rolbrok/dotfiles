@@ -1,0 +1,29 @@
+#!/bin/bash
+
+calc() {
+python << EOF
+from math import *
+
+args = []
+for v in "$@".split(' '):
+    try:
+        exec("d = {0}".format(v))
+        args.append(float(d))
+    except:
+        args.append(v)
+
+for i in args:
+    print(i, end=" ")
+print()
+EOF
+}
+
+charge_time=$(acpi | ft -f 5)
+charge=$(battery | ft -f 2)
+charge_speed=$(calc "(100-$charge)/$(hours $charge_time)")
+
+if [ -z "$1" ]; then wanted=90; else wanted="$1"; fi
+
+hours=$(hours $(calc "($wanted-$charge)/$charge_speed"))
+
+echo $hours

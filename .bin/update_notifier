@@ -1,0 +1,21 @@
+#!/bin/sh
+
+day="$(date +%u)"
+
+# Which day of the week is it ?
+# ex: Saturday -> 6
+if [ ! $day -eq 6 ]; then
+    exit
+fi
+
+# Time interval in seconds
+# ex: 900 = 15 * 60 -> 15 minutes
+time_interval=900
+
+while :; do
+    update_size=$(pacman -Q -u | ft -l)
+    if [ $update_size -gt 0 -a $(($(ps aux | grep -c "pacman") - 1)) -ge 1 ]; then
+        notify-dzen "It's Saturday, Think about updating ! ($update_size packages to go)" 400 & 
+    fi
+    sleep $time_interval
+done

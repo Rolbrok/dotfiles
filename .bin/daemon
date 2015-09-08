@@ -1,0 +1,57 @@
+#!/bin/sh
+
+CONF="/etc/audio-server.conf"
+
+if [ -z $1 ]; then
+cat << EOF
+Usage: daemon <command>
+commands:
+    bu: Backlight++
+    bd: Backlight--
+    vu: Volume++
+    vd: Volume--
+    vm: Volume Mute
+
+EOF
+fi
+
+get_var() {
+    echo "$(cat "$1" | grep -Eoh "$2=(.*?)" | sed -e "s/$2=//g")"
+}
+
+fifo="$(get_var "$CONF" "FIFO")"
+
+case $1 in
+    bu)
+        xbacklight -inc 5
+        back=$(math ceil $(xbacklight) i)
+        notify-write "Backlight $(loading_bar_c ${back} 100 10) ($back)" backlight
+        ;;
+    bd)
+        xbacklight -dec 5 
+        back=$(math ceil $(xbacklight) i)
+        notify-write "Backlight $(loading_bar_c ${back} 100 10) ($back)" backlight
+        ;;
+    vu)
+        amixer -q sset Master 3%+
+        vol=$(volume | ft -f 2)
+        notify-write "Volume $(loading_bar_c $vol 100 10) ($vol)" volume
+        ;;
+    vd)
+        amixer -q sset Master 3%-
+        vol=$(volume | ft -f 2)
+        notify-write "Volume $(loading_bar_c ${vol} 100 10) ($vol)" volume
+        ;;
+    vm)         
+        state=$(amixer -c 0 sget Master | grep -Eo "\[(.*?)\]" | cut -d ' ' -f 3)
+        
+        if [ $state == "[off]" ]
+        then
+            notify-write "Unmute" mute
+            echo unmute > "$fifo"
+        else
+            notify-write "Mute" mute
+            echo mute > "$fifo"
+        fi
+        ;;
+esac

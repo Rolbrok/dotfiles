@@ -1,0 +1,41 @@
+[options]
+allow_bold           =  false
+audible_bell         =  false
+browser              =  firefox
+clickable_url        =  true
+cursor_blink         =  off
+cursor_shape         =  block
+dynamic_title        =  false
+font                 =  terminus 9
+mouse_autohide       =  false
+scroll_on_keystroke  =  true
+scroll_on_output     =  false
+scrollback_lines     =  10000
+search_wrap          =  true
+urgent_on_bell       =  true
+
+[colors]
+background  =  #2d2d2d
+color0      =  #000000
+color1      =  #ad8585
+color10     =  #85ad85
+color11     =  #d6d6c2
+color12     =  #8585ad
+color13     =  #d6c2d6
+color14     =  #c2d6d6
+color15     =  #ffffff
+color16     =  #fd971f
+color17     =  #cc6633
+color18     =  #383830
+color19     =  #49483e
+color2      =  #7db67d
+color20     =  #a59f85
+color21     =  #f5f4f1
+color3      =  #adad85
+color4      =  #545490
+color5      =  #ad85ad
+color6      =  #85adad
+color7      =  #d9d9d9
+color8      =  #262626
+color9      =  #d6c2c2
+foreground  =  #8c8c8c

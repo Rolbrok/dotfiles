@@ -1,0 +1,10 @@
+#!/bin/sh
+
+if [ ! -z "$1" ]; then
+    req="$(ping -c 1 "$1" 2>/dev/null)"
+    if [ "$(echo "$req" | grep -c 'Unreachable')" -gt 0 ]; then
+        echo "0"
+    else
+        echo "$(echo "$req" | grep icmp* | wc -l)"
+    fi
+fi
