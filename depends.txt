@@ -1,0 +1,9 @@
+lemonbar-xft-git
+dmenu2
+dzen2
+python2
+python
+bspwm
+gcc
+g++
+feh
