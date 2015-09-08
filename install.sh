@@ -5,12 +5,18 @@ if [ ! $(id -u) -eq 0]; then
     exit 1
 fi
 
-TMP_FILE="/tmp/ft"
+PACKMAN="pacman -S"
 
-mkdir -p "$TMP_FILE"
-cd $TMP_FILE
+TMP_FOLDER="/tmp/ft"
+
+mkdir -p "$TMP_FOLDER"
+cd $TMP_FOLDER
 git clone https://github.com/Rolbrok/ft.git
 cd ft
 make
 make install
 cd -
+
+for line in $(cat depends.txt); do
+    $PACKMAN $line
+done
