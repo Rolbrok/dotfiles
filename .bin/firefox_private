@@ -1,0 +1,6 @@
+#!/bin/sh
+
+webpage="file://$HOME/.data/web/.bookmarks.html"
+
+echo $webpage
+firefox --private-window $webpage

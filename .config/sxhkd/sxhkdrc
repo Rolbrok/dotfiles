@@ -161,7 +161,8 @@ super + n
     firefox
 
 super + shift + n
-    firefox --private-window file:///home/rolbrok/.data/web/.bookmarks.html
+    firefox_private
+#    firefox --private-window file:///home/rolbrok/.data/web/.bookmarks.html
 
 Print
     cd /tmp && scrot -e 'mv $f ~/Pictures/scrot/' && cd -
