@@ -1,0 +1,171 @@
+# System Hotkeys
+XF86MonBrightnessUp
+    daemon bu
+
+XF86MonBrightnessDown
+    daemon bd
+
+XF86AudioRaiseVolume
+    daemon vu
+
+XF86AudioLowerVolume
+    daemon vd
+
+XF86AudioMute
+    daemon vm
+
+# MPD Shortcuts
+ctrl + shift + Left
+    mpc prev
+ctrl + shift + Right
+    mpc next
+ctrl + shift + Up
+    mpc toggle
+ctrl + shift + Down
+    mpc stop
+
+#
+# bspwm hotkeys
+#
+
+# quit bspwm
+super + alt + Escape
+	pkill -USR1 -x bspwm 
+
+super + alt + ctrl + Escape
+	pkill notify-daemon && killall panel && bspc quit
+
+# quit window
+super + q
+	bspc window -c
+
+# Lock screen
+super + l
+    lock
+
+# Tiling
+super + t
+	bspc desktop -l next
+
+# Toggle pseudotiled (floating in tile)
+super + shift + space
+    bspc window -t pseudo_tiled
+
+# Focus on floating / tiled
+super + e
+    bspc window -f {next.floating,next.tiled}
+
+# Balance Tree
+super + b
+	bspc desktop -B
+
+# floating/fullscreen
+super + {s,f}
+	bspc window -t {floating,fullscreen}
+
+# Change focus/desktop (go to last) 
+super + {ugrave,Tab}
+	bspc {window,desktop} -f last
+
+# Invert focus with last window
+super + dollar
+    bspc window -s last
+
+# previous/next focus
+super + {o,i}
+	bspc control --record-history off; \
+	bspc window {older,newer} -f; \
+	bspc control --record-history on
+
+# Manual
+super + y
+	bspc window -w last.manual
+
+super + m
+	bspc window -s biggest
+
+# focus/move window (left, down, up, right)
+super + {_,shift + }{h,j,k,l}
+	bspc window -{f,s} {left,down,up,right}
+
+# go to next/prev window (focus)
+super + {_,shift + }c
+	bspc window -f {next,prev}
+
+# rotate shit up !
+super + {comma,semicolon}
+	bspc desktop -C {backward,forward}
+
+super + bracket{left,right}
+	bspc desktop -f {prev,next}
+
+# select zone on current window
+super + ctrl + {h,j,k,l}
+	bspc window -p {left,down,up,right}
+
+super + ctrl + {_,shift + }space
+	bspc {window -p cancel,desktop -c}
+
+#resize window
+super + alt + {h,j,k,l}
+	bspc window -e {left -10,up +10,up -10,left +10}
+
+super + ctrl + {1-9}
+	bspc window -r 0.{1-9}
+
+super + {_,shift + }{1-9,0}
+	bspc {desktop -f,window -d} ^{1-9,10}
+
+~button1
+	bspc pointer -g focus
+
+super + button{1-3}
+	bspc pointer -g {move,resize_side,resize_corner}
+
+super + !button{1-3}
+	bspc pointer -t %i %i
+
+super + @button{1-3}
+	bspc pointer -u
+
+super + {_,ctrl + }{ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore,ccedilla,agrave}
+	bspc {desktop -f, window -d} $(bspc query -M -m)/{1,2,3,4,5,6,7,8,9,10}
+
+#super + {_,ctrl + }{ampersand,eacute,quotedbl,apostrophe,parenleft,minus,egrave,underscore,ccedilla,agrave}
+#	bspc {desktop -f, window -d} {1,2,3,4,5,6,7,8,9,10}
+
+# Change window gap
+ctrl + {minus,equal}
+    bspc config -d focused window_gap $((`bspc config -d focused window_gap` {+,-} 2 ))
+
+#
+# wm independent hotkeys
+#
+
+super + Return
+	nofloat termite
+
+super + shift + Return
+    termite_float
+
+super + ctrl + shift + Return
+    termite_float cmatrix
+
+super + ctrl + d
+    dmenu_launch
+
+super + d
+    rofi -show run
+
+super + n
+    firefox
+
+super + shift + n
+    firefox --private-window file:///home/rolbrok/.data/web/.bookmarks.html
+
+Print
+    cd /tmp && scrot -e 'mv $f ~/Pictures/scrot/' && cd -
+
+# make sxhkd reload its configuration files:
+super + Escape
+	pkill -USR1 -x sxhkd

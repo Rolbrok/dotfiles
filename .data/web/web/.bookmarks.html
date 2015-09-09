@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+        <meta content="utf-8" http-equiv="encoding">
+        <title>Bookmarks</title>
+        <link rel="stylesheet" href=".style.css">
+    </head>
+    <script type="text/javascript">
+        function updateCenter() {
+            var winW = document.body.clientWidth
+            || document.documentElement.clientWidth
+            || window.innerHeight;
+
+            var blockW = 175*2;              
+            var left = (winW - blockW) / 2;
+
+            var entity = document.getElementById("ful");
+            entity.style["margin-left"] = left.toString() + "px";            
+        }
+    </script>
+    <body onresize="updateCenter()">
+        <div id="container">
+            <form class="searchForm" method="get" action="http://www.duckduckgo.com/">
+                <input class="searchBar" type="text" name="q" placeholder="Search"/>
+            </form>
+            <div id="ful">
+                <div id="Section">
+                    <h3>Home</h3><ul>
+                        <li><a href="http://reddit.com" >Home</a></li>
+                        <li><a href="https://cas.isen.fr" >ISEN</a></li></ul>
+                    <h3>Programming</h3><ul>
+                        <li><a href="http://www.cplusplus.com/doc/" >C++ Docs</a></li>
+                        <li><a href="https://docs.python.org/3/" >Python 3.4 Docs</a></li>
+                        <li><a href="http://learnxinyminutes.com/" >Learn X in Y min.</a></li>
+                        <li><a href="http://reddit.com/r/programming" >/r/programming</a></li></ul>
+                    <h3>News</h3><ul>
+                        <li><a href="https://news.ycombinator.com/" >Hacker News</a>
+                        <!--<li><a href="http://thehackernews.com/" >The Hacker News</a>-->
+                        <li><a href="http://korben.info/" >Korben</a>
+                </div>
+                <div id="Section">
+                    <h3>Search</h3><ul>
+                        <li><a href="http://google.com" >Google</a>
+                        <li><a href="http://duckduckgo.com" >DuckDuckGo</a>
+                        <!--<li><a href="http://tools.kali.org/" >Kali Tools</a>-->
+                    </ul>
+                    <h3>Arch</h3><ul>
+                        <li><a href="https://www.archlinux.org/" >Home</a>
+                        <li><a href="https://www.archlinux.org/packages" >Packages</a>
+                        <li><a href="https://aur.archlinux.org/" >AUR</a>
+                        <li><a href="https://bbs.archlinux.org/" >Forums</a>
+                    </ul>
+                    <h3>Entertainment</h3><ul>
+                        <li><a href="http://youtube.com" >Youtube</a>
+                        <li><a href="http://www.boredbutton.com/" >Bored Button</a>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <script type="text/javascript">
+            updateCenter();
+        </script>
+    </body>
+</html>
