@@ -33,3 +33,4 @@ cp -r .bin/ $home/
 cp -r .panel/ $home/
 cp .*rc $home/
 cp .X* $home/
+cp .*colors $home/
